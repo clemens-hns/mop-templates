@@ -95,7 +95,7 @@ sh crypto isakmp sa
 
 
 Documentation:
-Document the changes, validation steps, and logout script output in the VMAC.
+Document the changes, validation steps, and logout script output in the ticket.
 
 
 Communication:**

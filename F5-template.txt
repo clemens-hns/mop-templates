@@ -12,7 +12,7 @@ PreCheck:**
           Option 1. Use the Archive tool to make a backup of the config via the GUI
                System >> Archives
                     Click "Create"
-                    File Name: <VMAC number>-Pre
+                    File Name: <tckt number>-Pre
 
 
 

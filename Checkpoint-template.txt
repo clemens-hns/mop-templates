@@ -19,7 +19,7 @@ Communication:**
         Track: Log
         Install On: Policy Targets
         Time: Any
-        Comment: <VMAC number> <current date> <your login ID>
+        Comment: <tckt number> <current date> <your login ID>
 ***FOR MODIFICATIONS TO EXISTING RULES***
    2b) Modify existing rule(s) as follows:
         <Specify what line numbers need to be modified, and what objects need to be added/removed from which fields>
@@ -36,10 +36,10 @@ Communication:**
 
 
 Validation
-    Double-check that the changes made under the VMAC match the clients request.
+    Double-check that the changes made under the ticket match the clients request.
 
 Documentation:**
-    Detail the changes that were made in the VMAC notes (lines added/removed, and/or objects added/removed from specified lines and fields).  If a question or issues comes up regarding the changes, the next person should be able to read this note and know EXACTLY what was changed.
+    Detail the changes that were made in the ticket notes (lines added/removed, and/or objects added/removed from specified lines and fields).  If a question or issues comes up regarding the changes, the next person should be able to read this note and know EXACTLY what was changed.
 
 Communication:**
     <Post-Maintenance communication requirements may be defined by the client.  If none are defined by the client, contact the requester by phone or Email to notify of completion>

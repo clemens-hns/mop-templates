@@ -6,7 +6,7 @@ Communication:**
     <Pre-Maintenance communication requirements will be defined by the client>
 
 PreCheck:**
-    Take a snapshot of the current context configuration and document it in the VMAC notes or attachments
+    Take a snapshot of the current context configuration and document it in the ticket notes or attachments
         show run
 
 ########## Execution Steps ##########
