@@ -1,0 +1,92 @@
+
+
+Devices:
+<device>
+<standby IP>
+
+PreCheck:**
+Make a copy of the running config of the A10 context and save it to your desktop
+
+show run slb virtual-server | i <VIP>
+Find client-ssl profile
+
+########## Execution Steps ##########
+
+Import Cert to GUI under name:
+
+https://<device>
+Partition <partition>
+Import <CERT> to <NAME> in GUI
+
+
+ssh 10.144.192.29
+active-partition <partition>
+conf t
+
+slb template persist cookie vip-<VIP>-https-stickyfarm
+   name strong
+   expire 0
+   match-type service-group
+  
+slb service-group vip-<VIP>_443 tcp
+  method least-connection
+  health-check <health check>
+  member ip-<MEMBER> <port>
+  member ip-<MEMBER> <port>
+ 
+slb template client-ssl vip-<VIP>-https-ps
+   cert <CERT>
+   chain-cert <CHAIN>
+   key <KEY>
+   template cipher <parameter map>
+   disable-sslv3
+  
+slb virtual-server vip-<VIP>-http-cm <VIP>
+  port 80 http
+    aflex REDIRECT-SERVERFARM
+  port 443 https
+    aflex HEADERSIZE
+    aflex snatchange
+    aflex testTLS1
+    service-group <SERVICEGROUP>
+    template persist cookie <PERSISTCOOKIE>
+    template client-ssl <CLIENTSSL>
+    
+exit
+wr mem
+
+
+Once all changes have been completed, synchronize the configuration to the standby load balancer:
+     active-partition shared
+     config t
+      configure sync all partition <partition> <standby IP>
+     exit
+
+Validation:**
+
+     show slb virtual-server vip-<VIP>-http-cm
+     https://www.sslshopper.com/ssl-checker.html#hostname=<VIP>
+    
+Documentation:
+     show slb template client-ssl <TEMPLATE>
+     show run slb virtual-server vip-<VIP>-http-cm
+
+Communication:**
+    
+
+** Indicates there should be a output to Ticketing System with a specific note.
+
+========== Backout Plan ==========
+
+ssh 10.144.192.29
+active-partition s604564sc9a
+conf t
+  
+no slb virtual-server vip-<VIP>-http-cm <VIP>
+no slb template client-ssl vip-<VIP>-https-ps
+no slb service-group vip-<VIP>_443 tcp
+no slb template persist cookie vip-<VIP>-https-stickyfarm
+
+exit
+wr mem
+
