@@ -1,0 +1,43 @@
+
+
+Devices:
+<active device> (Active)
+<standby device>
+
+Prechecks:
+list ltm virtual | grep <name>
+list ltm pool | grep <name>
+
+
+Save Pre-<tkt-number>
+============================Execution Steps==========================
+
+ssh root@(active)
+
+tmsh
+
+save sys ucs Pre-<tkt-number>
+
+
+create ltm pool <name> load-balancing-mode least-connections-member service-down-action reselect monitor gateway_icmp members add { <IP>:<port> <IP>:<port> <IP>:<port> }
+
+
+create ltm virtual <name> destination <VIP>:<port> pool <pool_name> rules { <rule_name> } persist  replace-all-with { source_addr }
+create ltm virtual virtual <name> destination <VIP>:<port> pool <pool_name> rules { <rule_name> } persist  replace-all-with { source_addr }
+
+save sys config
+
+run cm config-sync to-group <device group>
+
+Validation:
+list ltm virtual <name>
+
+Communication:
+
+
+==========================Rollback Steps==========================
+ssh root@(active)
+
+tmsh
+
+load sys ucs Pre-<tkt-number>
