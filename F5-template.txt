@@ -1,0 +1,66 @@
+
+
+Devices:
+     Currently Active: <Insert name and IP of the currently active load balancer in the pair>
+     Currently Standby: <Insert name and IP of the standby load balancer in the pair>
+
+Communication:**
+    <Pre-Maintenance communication requirements will be defined by the client>
+
+PreCheck:**
+  A.   Make a backup of the current Load Balancer configuration.
+          Option 1. Use the Archive tool to make a backup of the config via the GUI
+               System >> Archives
+                    Click "Create"
+                    File Name: <VMAC number>-Pre
+
+
+
+
+########## Execution Steps ##########
+All changes should be made via the GUI
+     - RDP to dc2ops02,na.msmps.net (167.215.232.41)
+     - Launch Internet Explorer
+     - Connect to https://<IP address of active load balancer>
+     - At security certificate warning page select "Continue to this website (not recommended)."
+     - Log in using your Unix (ldap) credentials
+     - Confirm that load balancer is still the Active load balancer in the pair (if not, log out and connect to the other LB in the pair).
+     - Select the appropriate partition in the drop-down menu (if applicable)
+
+
+
+
+
+
+Once all changes have been completed, synchronize the configuration to the standby load balancer:
+     Click the "Sync Recommended" link on the top-left of the page
+     Click "Synchronize TO Peer"
+     Click "OK"
+
+Validation:**
+     <define any steps that can be taken to validate the change(s).>
+          Examples: 
+               Go to http://www.sslshopper.com/ssl-checker.html and enter <URL or VIP IP address> to confirm new SSL Certificate is working correctly
+               Enter <URL or VIP IP address> into your browser address bar to confirm the status of a new VIP
+               Use the CLI to check pool(s) and confirm connections to new servers
+                    bp> pool <pool name> (or "b pool <pool name>" if logging in as root)
+
+Documentation:
+     SSH to the load balancer and use the CLI to document any configurations that were changed.
+          Examples (add "b " to the start of each command if logging in as root):
+               bp> virtual <VIP name> list
+               bp> pool <pool name> list
+               bp> profile clientssl <profile name> list
+               bp> node <node IP> list
+               bp> rule <iRule name> list
+
+Communication:**
+    <Specific communication requirements may be defined by the client.  If no special instructions are provided, include the name and contact information for the requester to be used for post-maintenance notification.>
+
+** Indicates there should be a output to Ticketing System with a specific note.
+
+========== Backout Plan ==========
+For minor rollbacks, use the GUI to remove specific elements that were added, or to revert changes that were made.  For major rollbacks, restore using the configuration backup made at the start of maintenance.  If changes have not yet been synced to the standby load balancer you can also revert by syncing from the standby load balancer to the active load balancer.
+
+
+

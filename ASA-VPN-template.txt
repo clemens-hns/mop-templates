@@ -1,0 +1,108 @@
+
+
+Device(s):
+    <Insert Device name here>
+
+Communication:**
+    <Pre-Maintenance communication requirements will be defined by the client>
+
+PreChecks to run prior to MOP creation:**
+1) Verify if sysopt connection permit-vpn is enabled or not
+sh run all | i permit-vpn
+     -if yes, then there is no ACL needed on the 'outside' (or vpn tunnel) interface allowing the inbound traffic
+     -if no, then an ACL rule will be needed on the 'outside' (or vpn tunnel) interface that permits the encrypted traffic coming in via the tunnel
+2) Verify if there is any NAT configured on the ASA that will require a no-nat or Identity NAT be configured.
+sh run nat
+     -VPN's frequently use private IP addressing on both ends, and often there are existing NAT configurations in place for these networks that need to be bypassed for the VPN
+     -It is almost never necessary to configure a no-nat on a shared ipsec ASA as any NAT configurations are typically done on the client's dedicated firewalls.
+3) Verify if there is already a phase 1 isakmp policy configured matching the parameters requested by the client
+sh run crypto isakmp
+     -All values need to match on both ends EXCEPT the 'lifetime' value.  If different lifetime values are configured, the tunnel will negotiate to the lower of the two.
+     -The ASA has a limit on the number of configured isakmp policies, so a new one should not be configured if the only difference is the lifetime.
+4) Verify if there is already a transform-set configured matching the requested phase 2 properties.
+sh run crypto ipsec
+     -All transform-set properties must match on both ends of the tunnel.
+5) Document the PSK on the secure MSS Taki site under the 'VPN Info' for the -pri firewall.  Because the PSK is encrypted in the ASA configuration, it does not get captured by regular configuration backups, so it is essential that we have it recorded in case the tunnel configuration is ever mistakenly deleted, or otherwise lost.
+     -Search for the device in Taki and click the 'VPN Info' link.  Enter the peer IP and the PSK in the designated fields.
+
+PreChecks to run at time of Execution:
+show run crypto map
+     -ensure that crypto map number for new tunnel is not already in use
+show crypto isakmp sa
+     -document the status of existing tunnels (to be used for post-maintenance validation)
+
+########## Execution Steps ##########
+s0 goto <device name>
+config t
+
+A new VPN configuration on an ASA typically requires the following elements:
+
+1) Object groups defining the local and remote hosts/networks to include in the vpn, and an access-list using these groups to define the encryption domain
+object-group network <vpn name>_local
+network-object <host or network to include>
+network-object <host or network to include>
+exit
+object-group network <vpn name>_remote
+network-object <host or network to include>
+network-object <host or network to include>
+exit
+access-list <vpn name>_encrypt extended permit ip object-group <vpn name>_local object-group <vpn name>_remote
+  NOTE: The encrypt ACL should permit all IP traffic between the object-groups.  Interface access-lists should be used to permit/restrict specific ports.
+
+2) Tunnel-group configuration defining the remote peer IP and the PSK
+tunnel-group <remote peer IP> type ipsec-l2l
+tunnel-group <remote peer IP> ipsec-attributes
+pre-shared-key <see Taki>
+
+3) isakmp policy and/or transform-set configuration (if needed)
+  -isakmp policy configuration example:
+     crypto isakmp policy 55
+      authentication pre-share
+      encryption aes-256
+      hash sha
+      group 2
+      lifetime 28800
+  -transform set configuration example:
+     crypto ipsec transform-set ESP-AES256-SHA1 esp-aes-256 esp-sha-hmac
+
+4) Crypto map configuration tying together the remote peer IP, the encryption domain ACL, and phase 2 ipsec properties
+  -The ASA will already have a map name defined and tied to the 'outside' interface.  All tunnels connecting via this interface will use the same map name, and a unique number
+     NOTE: Always double-check before dropping a crypto map configuration that that map number is not already in use, or you may break an existing VPN.  A number may have been available at the time of MOP creation, but in use at time of execution.
+crypto map <map name> <unique map number> match address <vpn name>_encrypt
+crypto map <map name> <unique map number> set peer <remote peer IP>
+crypto map <map name> <unique map number> set transform-set <transform set>
+   -Additional crypto map options (such as pfs and phase 2 lifetime values) may be needed based on the client's request.
+
+5) Interface access-list configurations (if needed)
+   -If a clients wants the VPN wide open to all hosts in the encryption domain, the object-groups from step 1 can be used.  More restrictive access will require the use of individual host or network IPs, or new unique object-groups.
+
+6) No-nat or Identity NAT configurations (if needed to bypass existing NAT configurations that would otherwise apply to the VPN traffic)
+   -For 8.2 and older code, use the existing nat 0 (no-nat) access-list
+     Example: access-list no-nat extended permit ip object-group <vpn name>_local object-group <vpn name>_remote
+     NOTE: A no-nat ACL rule should always be for all 'ip' traffic.  Adding a new rule to an existing no-nat ACL using tcp, udp, etc. could result in existing no-nat rules being disabled, and a client outage.
+   -For 8.3 and newer code, create an identity NAT statement
+     Example: nat (inside,outside) source static <vpn name>_local <vpn name>_local destination static <vpn name>_remote <vpn name>_remote no-proxy-arp route-lookup
+
+Validation:**
+1) Run a packet-tracer test twice to test the VPN configuration.  The 1st test fail (unless the tunnel is already up), but will trigger the tunnel negotiation.  If the tunnel come up successfully, the 2nd test should pass.  A failure at the 'VPN Encrypt' step of the test indicates that traffic is being sent to the tunnel, but that the tunnel is down.
+
+2) Check the status of the tunnel.  If the 2nd packet-tracer fails, the stage where the tunnel gets stuck will provide some indications of what the issue may be.  A good overview of the different status messages can be found at http://www.tunnelsup.com/isakmp-ike-phase-1-status-messages
+sh crypto isakmp sa
+
+3) Document that status of any pre-existing tunnels from the 'sh iskamp sa' output, and compare to the documented pre-checks.
+
+4) Review the logout script output to ensure that no "unexpected" changes have occurred and investigate any irregularities in the script output. 
+
+
+Documentation:
+Document the changes, validation steps, and logout script output in the VMAC.
+
+
+Communication:**
+    <Specific communication requirements may be defined by the client.  If no special instructions are provided, include the name and contact information for the requester to be used for post-maintenance notification.>
+
+
+** Indicates there should be a output to Ticketing System with a specific note.
+
+========== Backout Plan ==========
+<Scripted lines of configuration that can be copied and pasted into the ASA to back out the changes that were made.  Elements should generally be removed in the reverse order that they were added due to dependencies>

@@ -1,0 +1,55 @@
+
+
+Devices:
+
+
+PreCheck:**
+Make a copy of the running config of the A10 context and save it to your desktop
+
+
+common name         : <domain>
+SANS                : <domain>, <domain>
+Division            : 
+Organization        : 
+Locality            :  
+State or Province   :  
+Country             :  
+Email Address       : 
+
+########## Execution Steps ##########
+
+Create Key and CSR file:
+openssl req -out <domain>-<year>.csr -new -newkey rsa:2048 -nodes -sha256 -keyout <domain>-<year>.key -config .cnf<domain>-<year>
+
+Import Key to GUI
+
+https://<device IP>
+Partition <partition>
+Import <domain>-<year>.key to <domain>-<year> in GUI
+
+
+Once all changes have been completed, synchronize the configuration to the standby load balancer:
+     active-partition shared
+     config t
+     ha sync all to-startup-config <standby IP> partition <partition>
+     ha sync all to-running-config <standby IP> partition <partition>
+     exit
+
+Validation:**
+    openssl req -noout -text -verify -in <domain>-<year>.csr
+     show slb ssl cert | i <domain>-<year>
+
+Documentation:
+     Send CSR file to requester
+
+Communication:**
+    
+
+** Indicates there should be a output to Ticketing System with a specific note.
+
+
+========== Backout Plan ==========
+
+Remove key: <domain>-<year>.key
+
+

@@ -1,0 +1,43 @@
+Device(s):
+<Device name and IP>
+ 
+
+########## Execution Steps ##########
+1) Login via GUI to https://<mgmt IP> from DC2OPS02/03
+admin username can be retrieved from Taki. 
+password can be retreived from the security bastion
+
+2) Browse to Policy -> Policy
+
+3) Click 'Create New' and input the rule with the following parameters. 
+Source Interface: <ZONE_X>
+Source Address: 
+Destination Interface: <ZONE_X>
+Destination Address:
+Service:
+Action: <Allow/Deny>
+NAT: (is this going out to the PublicINTERNET zone? if so then check NAT and use destination interface)
+
+Click OK.
+
+Find rule in the GUI under the "Sourcezone -> Destinationzone" Take note of the Policy ID and not the Sequence #.
+
+4) Ensure if there is a * deny all above the new rule that you move the new rule above that rule. 
+Right-click on the deny all rule and select 'Move To'
+Move to 'After' policy ID of the new rule
+Click OK
+
+
+Validation & Documentation:**
+From the CLI (s0 goto):
+show firewall policy <policy ID>
+exit.
+
+Communication:**
+Notify the requester of completion
+
+
+** Indicates there should be a output to Ticketing System with a specific note.
+
+========== Contingency/Backout Plan ==========
+Select the newly created policy ID and select delete.

@@ -1,0 +1,43 @@
+Device(s):
+    <Insert ACE and context name>
+        -If this is on a dedicated client switch, document the IP and any special login procedures for the switch
+
+Communication:**
+    <Pre-Maintenance communication requirements will be defined by the client>
+
+PreCheck:**
+    Take a snapshot of the current context configuration and document it in the VMAC notes or attachments
+        show run
+
+########## Execution Steps ##########
+1) Log into the customer context using SecurID credentials.  From a network jump box:
+ssh <ace name>
+changeto <context name>
+
+2) Confirm that you are in the active context.  *Changes should only be made in the active context*
+  -Note: When adding an SSL Key or Cert, it needs to be added to BOTH the active and standby context BEFORE a write mem is performed
+    show ft group status
+        check to ensure that "My State" is Active, and "Peer State" is Standby Hot.
+            My State                     : FSM_FT_STATE_ACTIVE
+            Peer State                   : FSM_FT_STATE_STANDBY_HOT
+
+3) Execute scripted changes
+config t
+<Scripted lines of configuration that can be copied and pasted into the ACE.  For creating a new VIP, use the New ACE VIP utility to silplify the process>
+write mem
+
+Validation:**
+    <Define any steps that can be taken to verify the change is working.  Whenever possible, test a VIP using a web browser to verify functionality and check for SSL issues if applicable.>
+
+Communication:**
+    <Specific communication requirements may be defined by the client.  If no special instructions are provided, include the name and contact information for the requestor to be used for post-maintenance notification.>
+
+
+** Indicates there should be a output to Ticketing System with a specific note.
+
+
+========== Backout Plan ==========
+
+<Scripted lines of configuration that can be copied and pasted into the ACE to back out the changes that were made>
+
+.

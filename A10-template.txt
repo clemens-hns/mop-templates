@@ -1,0 +1,47 @@
+Devices:
+     Currently Active: <Insert name and IP of the currently active load balancer in the pair>
+     Currently Standby: <Insert name and IP of the standby load balancer in the pair>
+
+Communication:**
+    <Pre-Maintenance communication requirements will be defined by the client>
+
+PreCheck:**
+Make a copy of the running config of the A10 context and save it to your desktop
+
+########## Execution Steps ##########
+ssh <ip>
+enable
+active-partition <partition>
+
+config t
+
+
+end 
+write mem
+
+
+Once all changes have been completed, synchronize the configuration to the standby load balancer:
+     active-partition shared
+	 config t
+	 ha sync all to-startup-config <secondary IP> partition <partition>
+	 ha sync all to-running-config <secondary IP> partition <partition>
+     exit
+
+Validation:**
+     
+
+Documentation:
+     
+
+Communication:**
+    <Specific communication requirements may be defined by the client.  If no special instructions are provided, include the name and contact information for the requester to be used for post-maintenance notification.>
+
+
+** Indicates there should be a output to Ticketing System with a specific note.
+
+
+========== Backout Plan ==========
+
+
+
+

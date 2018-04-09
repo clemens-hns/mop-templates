@@ -1,0 +1,53 @@
+Device(s):
+    <Firewall name(s), CMA IP(s), and version>
+
+Communication:**
+    <Pre-Maintenance communication requirements will be defined by the client>
+
+########## Execution Steps ##########
+1) Checkout the device from the Security Bastion server
+    s0 checkout <device name>
+
+2) Make the requested changes via the Smart Dashboard GUI
+***FOR NEW RULES***
+  2a) Add a new rule with the following parameters:
+        Line: Add <above/below> <line number>
+        Source: <object(s) to be added to Source field>
+        Destination: <object(s) to be added to Destination field>
+        Service: <object(s) to be added to Service field>
+        Action: <accept/deny>
+        Track: Log
+        Install On: Policy Targets
+        Time: Any
+        Comment: <VMAC number> <current date> <your login ID>
+***FOR MODIFICATIONS TO EXISTING RULES***
+   2b) Modify existing rule(s) as follows:
+        <Specify what line numbers need to be modified, and what objects need to be added/removed from which fields>
+
+3) Save the policy using the "Save" button
+
+4) Verify the policy using the "Verify Policies" button.  Investigate and resolve any issues found during verification.
+
+5) Install the policy on the firewall using the "Install Policies" button.
+    -If any issues arise that prevent the policy from being installed on the firewall, troubleshooting may be required.  There is some information on common issues at https://confluence.savvis.net/download/attachments/58685346/Checkpoint+training+document-HNS.doc?version=1&modificationDate=1350485680000 section 3c.  If you are unable to resolve the policy push issue, create an incident case for the policy push failure and engage the HNS Incident team.
+
+6) Checkin the device from the Security Bastion server
+    s0 checkin <device name>
+
+
+Validation
+    Double-check that the changes made under the VMAC match the clients request.
+
+Documentation:**
+    Detail the changes that were made in the VMAC notes (lines added/removed, and/or objects added/removed from specified lines and fields).  If a question or issues comes up regarding the changes, the next person should be able to read this note and know EXACTLY what was changed.
+
+Communication:**
+    <Post-Maintenance communication requirements may be defined by the client.  If none are defined by the client, contact the requester by phone or Email to notify of completion>
+
+
+** Indicates there should be a output to Ticketing System with a specific note.
+
+========== Contingency/Backout Plan ==========
+<Define steps to return the policy to the pre-maintenance state.  Specify line numbers to add/remove, or specific objects to add/remove from specified lines and fields.  If there turns out to be an issue related to the change, the next person should be able to return the policy to the pre-maintenance state quickly and easily by following this plan>
+
+

@@ -1,0 +1,39 @@
+Template for firewall changes
+
+
+####HNS MOP BEGIN####
+
+Device(s):
+<device name>
+
+Communication:**
+    <Pre-Maintenance communication requirements will be defined by the client>
+
+PreCheck:**
+
+########## Execution Steps ##########
+s0 goto <device name>
+config t
+
+
+
+
+
+
+end
+wr mem
+exit
+
+####HNS MOP END####
+
+Validation:**
+
+Documentation:
+
+Communication:**
+    <Specific communication requirements may be defined by the client.  If no special instructions are provided, include the name and contact information for the requester to be used for post-maintenance notification.>
+
+========== Contingency/Backout Plan ==========
+
+
+
